@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WC 2026 — Match Schedule (SGT)</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: #ffffff;
+    color: #111;
+    padding: 0 14px 48px;
+    max-width: 600px;
+    margin: 0 auto;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* ── Masthead ── */
+  .masthead {
+    border-top: 3px solid #111;
+    padding-top: 10px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .masthead-date, .masthead-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #666;
+  }
+
+  h1 {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 3px;
+  }
+  .subtitle {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 20px;
+  }
+
+  /* ── Tabs ── */
+  .tab-bar {
+    display: flex;
+    border-bottom: 2px solid #e0e0e0;
+    margin-bottom: 20px;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 12px 8px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: none;
+    background: transparent;
+    color: #999;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    -webkit-appearance: none;
+    transition: color 0.15s;
+    line-height: 1.2;
+  }
+  .tab-btn.active {
+    color: #111;
+    border-bottom-color: #111;
+  }
+
+  /* ── Tab panels ── */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Next 10 cards ── */
+  .next10-updated {
+    font-size: 10px;
+    color: #aaa;
+    margin-bottom: 14px;
+  }
+  .next10-list { display: flex; flex-direction: column; }
+  .next10-card {
+    background: #fafafa;
+    border: 1px solid #e0e0e0;
+    border-bottom: none;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .next10-list .next10-card:last-child { border-bottom: 1px solid #e0e0e0; }
+  .next10-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: #ccc;
+    font-weight: 600;
+    min-width: 18px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .next10-body { flex: 1; min-width: 0; }
+  .next10-teams {
+    font-size: 14px;
+    font-weight: 600;
+    color: #111;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+    margin-bottom: 3px;
+  }
+  .next10-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .next10-date {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: #666;
+  }
+  .next10-grp {
+    font-size: 10px;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .next10-venue { font-size: 10px; color: #bbb; }
+  .next10-timecol { text-align: right; flex-shrink: 0; }
+  .next10-time {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a6b3a;
+    letter-spacing: 0.02em;
+    display: block;
+  }
+  .next10-sgt { font-size: 9px; color: #aaa; display: block; text-align: right; }
+  .next10-all-done {
+    padding: 24px;
+    text-align: center;
+    color: #bbb;
+    font-size: 13px;
+    background: #fafafa;
+    border: 1px solid #e0e0e0;
+  }
+
+  /* ── Team lookup controls ── */
+  .controls {
+    background: #fafafa;
+    border: 1px solid #e0e0e0;
+    padding: 14px;
+    margin-bottom: 20px;
+  }
+  .control-row { display: flex; flex-direction: column; gap: 12px; }
+
+  label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #444;
+    display: block;
+    margin-bottom: 5px;
+  }
+  .sort-row { display: flex; }
+  .sort-btn {
+    flex: 1;
+    padding: 10px 6px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border: 1px solid #ccc;
+    background: #fff;
+    cursor: pointer;
+    color: #555;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-appearance: none;
+    border-radius: 0;
+    transition: background 0.15s, color 0.15s;
+    line-height: 1.2;
+    min-width: 0;
+  }
+  .sort-btn:first-child { border-right: none; }
+  .sort-btn.active { background: #111; color: #fff; border-color: #111; }
+
+  select {
+    width: 100%;
+    padding: 12px 36px 12px 12px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 15px;
+    border: 1px solid #ccc;
+    background: #fff;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23333' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    cursor: pointer;
+    color: #111;
+    border-radius: 0;
+  }
+  select:focus { outline: 2px solid #1d4ed8; outline-offset: 1px; }
+
+  /* ── Team match cards ── */
+  .team-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  .team-flag { font-size: 28px; line-height: 1; }
+  .team-name {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+  .team-meta { font-size: 11px; color: #666; margin-top: 2px; }
+
+  .matches-list { display: flex; flex-direction: column; gap: 10px; }
+  .match-card {
+    background: #fafafa;
+    border: 1px solid #e0e0e0;
+    padding: 12px 14px;
+  }
+  .match-card.past { opacity: 0.45; background: #f5f5f5; }
+  .match-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 4px;
+  }
+  .match-stage {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #888;
+    font-weight: 600;
+  }
+  .match-venue {
+    font-size: 10px;
+    color: #999;
+    text-align: right;
+    max-width: 55%;
+    line-height: 1.3;
+  }
+  .match-teams {
+    font-size: 15px;
+    font-weight: 600;
+    color: #111;
+    line-height: 1.3;
+    margin-bottom: 6px;
+  }
+  .match-teams .selected { color: #1d4ed8; }
+  .match-time-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .match-date {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: #555;
+  }
+  .match-time {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 17px;
+    color: #1a6b3a;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+  .match-card.past .match-time { color: #999; }
+  .sgt-label { font-size: 10px; color: #aaa; }
+  .past-tag {
+    font-size: 10px;
+    background: #e0e0e0;
+    color: #888;
+    padding: 2px 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    margin-left: auto;
+  }
+  .section-divider {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #bbb;
+    border-top: 1px solid #e0e0e0;
+    padding-top: 8px;
+    margin: 16px 0 8px;
+  }
+  .count-label { font-size: 11px; color: #888; margin-bottom: 12px; }
+  .no-matches {
+    padding: 24px 0;
+    text-align: center;
+    color: #999;
+    font-size: 14px;
+  }
+  .prompt-hint {
+    padding: 32px 0 16px;
+    text-align: center;
+    color: #ccc;
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <span class="masthead-date" id="todayDate"></span>
+  <span class="masthead-label">FIFA World Cup 2026</span>
+</div>
+
+<h1>Match Schedule</h1>
+<p class="subtitle">Group stage · All times in Singapore Time (SGT, UTC+8)</p>
+
+<!-- ── Tab bar ── -->
+<div class="tab-bar">
+  <button class="tab-btn active" id="tab-next10" onclick="switchTab('next10')">Next 10 Matches</button>
+  <button class="tab-btn" id="tab-team" onclick="switchTab('team')">Find by Team</button>
+</div>
+
+<!-- ── Panel: Next 10 ── -->
+<div class="tab-panel active" id="panel-next10">
+  <div class="next10-updated" id="next10Updated"></div>
+  <div id="next10Body"></div>
+</div>
+
+<!-- ── Panel: Find by Team ── -->
+<div class="tab-panel" id="panel-team">
+  <div class="controls">
+    <div class="control-row">
+      <div>
+        <label>Sort teams by</label>
+        <div class="sort-row">
+          <button class="sort-btn" id="btnRanking" onclick="setSort('ranking')">FIFA Ranking</button>
+          <button class="sort-btn active" id="btnAlpha" onclick="setSort('alpha')">A – Z</button>
+        </div>
+      </div>
+      <div>
+        <label>Select a team</label>
+        <select id="teamSelect" onchange="renderMatches()">
+          <option value="">— Choose a team —</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div id="output"></div>
+</div>
+
+<script>
+// ─── DATA ───
+const rankingOrder = [
+  "Argentina","Spain","France","England","Portugal","Brazil","Morocco","Netherlands",
+  "Belgium","Germany","Croatia","Colombia","Mexico","Senegal","Uruguay","USA",
+  "Japan","Switzerland","Iran","Ecuador","South Korea","Australia","Algeria","Egypt",
+  "Canada","Norway","Ivory Coast","Panama","Scotland","Paraguay","Austria",
+  "Saudi Arabia","Ghana","Uzbekistan","South Africa","Czechia","Turkiye",
+  "Serbia","Cameroon","Tunisia","DR Congo","Sweden","New Zealand","Haiti",
+  "Bosnia and Herzegovina","Qatar","Jordan","Iraq","Cape Verde","Curacao","Nigeria"
+];
+
+const flags = {
+  "Argentina":"🇦🇷","Spain":"🇪🇸","France":"🇫🇷","England":"🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+  "Portugal":"🇵🇹","Brazil":"🇧🇷","Morocco":"🇲🇦","Netherlands":"🇳🇱",
+  "Belgium":"🇧🇪","Germany":"🇩🇪","Croatia":"🇭🇷","Colombia":"🇨🇴",
+  "Mexico":"🇲🇽","Senegal":"🇸🇳","Uruguay":"🇺🇾","USA":"🇺🇸",
+  "Japan":"🇯🇵","Switzerland":"🇨🇭","Iran":"🇮🇷","Ecuador":"🇪🇨",
+  "South Korea":"🇰🇷","Australia":"🇦🇺","Algeria":"🇩🇿","Egypt":"🇪🇬",
+  "Canada":"🇨🇦","Norway":"🇳🇴","Ivory Coast":"🇨🇮","Panama":"🇵🇦",
+  "Scotland":"🏴󠁧󠁢󠁳󠁣󠁴󠁿","Paraguay":"🇵🇾","Austria":"🇦🇹","Saudi Arabia":"🇸🇦",
+  "Ghana":"🇬🇭","Uzbekistan":"🇺🇿","South Africa":"🇿🇦","Czechia":"🇨🇿",
+  "Turkiye":"🇹🇷","Serbia":"🇷🇸","Cameroon":"🇨🇲","Tunisia":"🇹🇳",
+  "DR Congo":"🇨🇩","Sweden":"🇸🇪","New Zealand":"🇳🇿","Haiti":"🇭🇹",
+  "Bosnia and Herzegovina":"🇧🇦","Qatar":"🇶🇦","Jordan":"🇯🇴",
+  "Iraq":"🇮🇶","Cape Verde":"🇨🇻","Curacao":"🇨🇼","Nigeria":"🇳🇬"
+};
+
+const groups = {
+  "Mexico":"A","South Africa":"A","South Korea":"A","Czechia":"A",
+  "Canada":"B","Bosnia and Herzegovina":"B","Qatar":"B","Switzerland":"B",
+  "Brazil":"C","Morocco":"C","Haiti":"C","Scotland":"C",
+  "USA":"D","Paraguay":"D","Australia":"D","Turkiye":"D",
+  "Germany":"E","Curacao":"E","Ivory Coast":"E","Ecuador":"E",
+  "Netherlands":"F","Japan":"F","Sweden":"F","Tunisia":"F",
+  "Belgium":"G","Egypt":"G","Iran":"G","New Zealand":"G",
+  "Spain":"H","Cape Verde":"H","Saudi Arabia":"H","Uruguay":"H",
+  "France":"I","Senegal":"I","Iraq":"I","Norway":"I",
+  "Argentina":"J","Algeria":"J","Austria":"J","Jordan":"J",
+  "Portugal":"K","DR Congo":"K","Uzbekistan":"K","Colombia":"K",
+  "England":"L","Croatia":"L","Ghana":"L","Panama":"L"
+};
+
+const matches = [
+  {home:"Mexico",away:"South Africa",utc:"2026-06-11T19:00:00Z",venue:"Mexico City"},
+  {home:"South Korea",away:"Czechia",utc:"2026-06-12T02:00:00Z",venue:"Guadalajara"},
+  {home:"Canada",away:"Bosnia and Herzegovina",utc:"2026-06-12T19:00:00Z",venue:"Toronto"},
+  {home:"USA",away:"Paraguay",utc:"2026-06-13T01:00:00Z",venue:"Los Angeles"},
+  {home:"Qatar",away:"Switzerland",utc:"2026-06-13T19:00:00Z",venue:"San Francisco"},
+  {home:"Brazil",away:"Morocco",utc:"2026-06-13T22:00:00Z",venue:"New York/NJ"},
+  {home:"Haiti",away:"Scotland",utc:"2026-06-14T01:00:00Z",venue:"Boston"},
+  {home:"Australia",away:"Turkiye",utc:"2026-06-14T04:00:00Z",venue:"Vancouver"},
+  {home:"Germany",away:"Curacao",utc:"2026-06-14T17:00:00Z",venue:"Houston"},
+  {home:"Netherlands",away:"Japan",utc:"2026-06-14T20:00:00Z",venue:"Dallas"},
+  {home:"Ivory Coast",away:"Ecuador",utc:"2026-06-14T23:00:00Z",venue:"Philadelphia"},
+  {home:"Sweden",away:"Tunisia",utc:"2026-06-15T02:00:00Z",venue:"Monterrey"},
+  {home:"Spain",away:"Cape Verde",utc:"2026-06-15T16:00:00Z",venue:"Atlanta"},
+  {home:"Belgium",away:"Egypt",utc:"2026-06-15T19:00:00Z",venue:"Vancouver"},
+  {home:"Saudi Arabia",away:"Uruguay",utc:"2026-06-15T22:00:00Z",venue:"Miami"},
+  {home:"Iran",away:"New Zealand",utc:"2026-06-16T01:00:00Z",venue:"Los Angeles"},
+  {home:"France",away:"Senegal",utc:"2026-06-16T19:00:00Z",venue:"New York/NJ"},
+  {home:"Iraq",away:"Norway",utc:"2026-06-16T22:00:00Z",venue:"Boston"},
+  {home:"Argentina",away:"Algeria",utc:"2026-06-17T01:00:00Z",venue:"Kansas City"},
+  {home:"Austria",away:"Jordan",utc:"2026-06-17T04:00:00Z",venue:"San Francisco"},
+  {home:"Portugal",away:"DR Congo",utc:"2026-06-17T17:00:00Z",venue:"Houston"},
+  {home:"England",away:"Croatia",utc:"2026-06-17T20:00:00Z",venue:"Dallas"},
+  {home:"Ghana",away:"Panama",utc:"2026-06-17T23:00:00Z",venue:"Toronto"},
+  {home:"Uzbekistan",away:"Colombia",utc:"2026-06-18T02:00:00Z",venue:"Mexico City"},
+  {home:"Czechia",away:"South Africa",utc:"2026-06-18T16:00:00Z",venue:"Atlanta"},
+  {home:"Switzerland",away:"Bosnia and Herzegovina",utc:"2026-06-18T19:00:00Z",venue:"Los Angeles"},
+  {home:"Canada",away:"Qatar",utc:"2026-06-18T22:00:00Z",venue:"Vancouver"},
+  {home:"Mexico",away:"South Korea",utc:"2026-06-19T01:00:00Z",venue:"Guadalajara"},
+  {home:"USA",away:"Australia",utc:"2026-06-19T19:00:00Z",venue:"Seattle"},
+  {home:"Scotland",away:"Morocco",utc:"2026-06-19T22:00:00Z",venue:"Boston"},
+  {home:"Brazil",away:"Haiti",utc:"2026-06-20T00:30:00Z",venue:"Philadelphia"},
+  {home:"Turkiye",away:"Paraguay",utc:"2026-06-20T03:00:00Z",venue:"San Francisco"},
+  {home:"Netherlands",away:"Sweden",utc:"2026-06-20T17:00:00Z",venue:"Houston"},
+  {home:"Germany",away:"Ivory Coast",utc:"2026-06-20T20:00:00Z",venue:"Toronto"},
+  {home:"Ecuador",away:"Curacao",utc:"2026-06-21T03:00:00Z",venue:"Kansas City"},
+  {home:"Tunisia",away:"Japan",utc:"2026-06-21T04:00:00Z",venue:"Monterrey"},
+  {home:"Spain",away:"Saudi Arabia",utc:"2026-06-21T16:00:00Z",venue:"Atlanta"},
+  {home:"Belgium",away:"Iran",utc:"2026-06-21T19:00:00Z",venue:"Los Angeles"},
+  {home:"Uruguay",away:"Cape Verde",utc:"2026-06-21T22:00:00Z",venue:"Miami"},
+  {home:"New Zealand",away:"Egypt",utc:"2026-06-22T01:00:00Z",venue:"Vancouver"},
+  {home:"Argentina",away:"Austria",utc:"2026-06-22T17:00:00Z",venue:"Dallas"},
+  {home:"France",away:"Iraq",utc:"2026-06-22T21:00:00Z",venue:"Philadelphia"},
+  {home:"Norway",away:"Senegal",utc:"2026-06-23T00:00:00Z",venue:"New York/NJ"},
+  {home:"Jordan",away:"Algeria",utc:"2026-06-23T03:00:00Z",venue:"San Francisco"},
+  {home:"Portugal",away:"Uzbekistan",utc:"2026-06-23T17:00:00Z",venue:"Houston"},
+  {home:"England",away:"Ghana",utc:"2026-06-23T20:00:00Z",venue:"Boston"},
+  {home:"Panama",away:"Croatia",utc:"2026-06-23T23:00:00Z",venue:"Toronto"},
+  {home:"Colombia",away:"DR Congo",utc:"2026-06-24T02:00:00Z",venue:"Guadalajara"},
+  {home:"Switzerland",away:"Canada",utc:"2026-06-24T19:00:00Z",venue:"Vancouver"},
+  {home:"Bosnia and Herzegovina",away:"Qatar",utc:"2026-06-24T19:00:00Z",venue:"Seattle"},
+  {home:"Scotland",away:"Brazil",utc:"2026-06-24T22:00:00Z",venue:"Miami"},
+  {home:"Morocco",away:"Haiti",utc:"2026-06-24T22:00:00Z",venue:"Atlanta"},
+  {home:"Czechia",away:"Mexico",utc:"2026-06-25T01:00:00Z",venue:"Mexico City"},
+  {home:"South Africa",away:"South Korea",utc:"2026-06-25T01:00:00Z",venue:"Monterrey"},
+  {home:"Ecuador",away:"Germany",utc:"2026-06-25T20:00:00Z",venue:"New York/NJ"},
+  {home:"Curacao",away:"Ivory Coast",utc:"2026-06-25T20:00:00Z",venue:"Philadelphia"},
+  {home:"Japan",away:"Sweden",utc:"2026-06-25T23:00:00Z",venue:"Dallas"},
+  {home:"Tunisia",away:"Netherlands",utc:"2026-06-25T23:00:00Z",venue:"Kansas City"},
+  {home:"Turkiye",away:"USA",utc:"2026-06-26T02:00:00Z",venue:"Los Angeles"},
+  {home:"Paraguay",away:"Australia",utc:"2026-06-26T02:00:00Z",venue:"San Francisco"},
+  {home:"Norway",away:"France",utc:"2026-06-26T19:00:00Z",venue:"Boston"},
+  {home:"Senegal",away:"Iraq",utc:"2026-06-26T19:00:00Z",venue:"Toronto"},
+  {home:"Cape Verde",away:"Saudi Arabia",utc:"2026-06-27T00:00:00Z",venue:"Houston"},
+  {home:"Uruguay",away:"Spain",utc:"2026-06-27T00:00:00Z",venue:"Guadalajara"},
+  {home:"Egypt",away:"Iran",utc:"2026-06-27T03:00:00Z",venue:"Seattle"},
+  {home:"New Zealand",away:"Belgium",utc:"2026-06-27T03:00:00Z",venue:"Vancouver"},
+  {home:"Panama",away:"England",utc:"2026-06-27T21:00:00Z",venue:"New York/NJ"},
+  {home:"Croatia",away:"Ghana",utc:"2026-06-27T21:00:00Z",venue:"Philadelphia"},
+  {home:"Colombia",away:"Portugal",utc:"2026-06-27T23:30:00Z",venue:"Miami"},
+  {home:"DR Congo",away:"Uzbekistan",utc:"2026-06-27T23:30:00Z",venue:"Atlanta"},
+  {home:"Algeria",away:"Austria",utc:"2026-06-28T02:00:00Z",venue:"Kansas City"},
+  {home:"Jordan",away:"Argentina",utc:"2026-06-28T02:00:00Z",venue:"Dallas"},
+];
+
+// ─── HELPERS ───
+function toSGT(utcStr) {
+  return new Date(new Date(utcStr).getTime() + 8 * 3600 * 1000);
+}
+function formatSGTDate(sgt) {
+  const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return days[sgt.getUTCDay()] + " " + sgt.getUTCDate() + " " + months[sgt.getUTCMonth()];
+}
+function formatSGTTime(sgt) {
+  return String(sgt.getUTCHours()).padStart(2,'0') + ":" + String(sgt.getUTCMinutes()).padStart(2,'0');
+}
+function isPast(utcStr) { return new Date(utcStr) < new Date(); }
+
+// ─── TABS ───
+function switchTab(tab) {
+  ['next10','team'].forEach(t => {
+    document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+    document.getElementById('panel-' + t).classList.toggle('active', t === tab);
+  });
+}
+
+// ─── NEXT 10 ───
+function renderNext10() {
+  const now = new Date();
+  const upcoming = matches
+    .filter(m => new Date(m.utc) > now)
+    .sort((a, b) => new Date(a.utc) - new Date(b.utc))
+    .slice(0, 10);
+
+  const nowSgt = toSGT(now.toISOString());
+  document.getElementById('next10Updated').textContent =
+    'As of ' + formatSGTDate(nowSgt) + ' ' + formatSGTTime(nowSgt) + ' SGT';
+
+  const body = document.getElementById('next10Body');
+  if (upcoming.length === 0) {
+    body.innerHTML = '<div class="next10-all-done">All group stage matches have been played.</div>';
+    return;
+  }
+
+  let html = '<div class="next10-list">';
+  upcoming.forEach((m, i) => {
+    const sgt = toSGT(m.utc);
+    const grp = groups[m.home] || '?';
+    html += '<div class="next10-card">'
+      + '<div class="next10-num">' + (i + 1) + '</div>'
+      + '<div class="next10-body">'
+      + '<div class="next10-teams">'
+      + (flags[m.home]||'') + ' ' + m.home + ' vs ' + (flags[m.away]||'') + ' ' + m.away
+      + '</div>'
+      + '<div class="next10-meta">'
+      + '<span class="next10-date">' + formatSGTDate(sgt) + '</span>'
+      + '<span class="next10-grp">Grp ' + grp + '</span>'
+      + '<span class="next10-venue">' + m.venue + '</span>'
+      + '</div></div>'
+      + '<div class="next10-timecol">'
+      + '<span class="next10-time">' + formatSGTTime(sgt) + '</span>'
+      + '<span class="next10-sgt">SGT</span>'
+      + '</div></div>';
+  });
+  html += '</div>';
+  body.innerHTML = html;
+}
+
+// ─── TEAM LOOKUP ───
+let sortMode = 'alpha';
+
+function setSort(mode) {
+  sortMode = mode;
+  document.getElementById('btnRanking').classList.toggle('active', mode === 'ranking');
+  document.getElementById('btnAlpha').classList.toggle('active', mode === 'alpha');
+  populateDropdown();
+}
+
+function populateDropdown() {
+  const sel = document.getElementById('teamSelect');
+  const current = sel.value;
+  const allTeams = [...new Set(matches.flatMap(m => [m.home, m.away]))];
+
+  let sorted;
+  if (sortMode === 'ranking') {
+    sorted = rankingOrder.filter(t => allTeams.includes(t));
+    const notRanked = allTeams.filter(t => !rankingOrder.includes(t)).sort();
+    sorted = [...sorted, ...notRanked];
+  } else {
+    sorted = [...allTeams].sort((a, b) => a.localeCompare(b));
+  }
+
+  sel.innerHTML = '<option value="">— Choose a team —</option>';
+  sorted.forEach((team, idx) => {
+    const opt = document.createElement('option');
+    opt.value = team;
+    if (sortMode === 'ranking') {
+      opt.textContent = "#" + (idx + 1) + "  " + team;
+    } else {
+      const rank = rankingOrder.indexOf(team);
+      opt.textContent = team + (rank >= 0 ? " (FIFA #" + (rank + 1) + ")" : "");
+    }
+    sel.appendChild(opt);
+  });
+
+  if (current) sel.value = current;
+}
+
+function renderMatches() {
+  const team = document.getElementById('teamSelect').value;
+  const out = document.getElementById('output');
+  if (!team) { out.innerHTML = '<div class="prompt-hint">Select a team above to see their fixtures.</div>'; return; }
+
+  const teamMatches = matches.filter(m => m.home === team || m.away === team);
+  const flag = flags[team] || '';
+  const grp = groups[team] || '?';
+  const rankIdx = rankingOrder.indexOf(team);
+  const rankStr = rankIdx >= 0 ? "FIFA Rank #" + (rankIdx + 1) : '';
+
+  let upcoming = [], past = [];
+  teamMatches.forEach(m => isPast(m.utc) ? past.push(m) : upcoming.push(m));
+  upcoming.sort((a, b) => new Date(a.utc) - new Date(b.utc));
+  past.sort((a, b) => new Date(b.utc) - new Date(a.utc));
+
+  let html = '<div class="team-header">'
+    + '<div class="team-flag">' + flag + '</div>'
+    + '<div><div class="team-name">' + team + '</div>'
+    + '<div class="team-meta">Group ' + grp + (rankStr ? ' &nbsp;·&nbsp; ' + rankStr : '') + '</div>'
+    + '</div></div>';
+
+  if (upcoming.length > 0) {
+    html += '<div class="count-label">' + upcoming.length + ' upcoming match' + (upcoming.length > 1 ? 'es' : '') + '</div>';
+    html += '<div class="matches-list">';
+    upcoming.forEach(m => {
+      const sgt = toSGT(m.utc);
+      const opp = m.home === team ? m.away : m.home;
+      html += '<div class="match-card">'
+        + '<div class="match-card-top"><span class="match-stage">Group ' + grp + '</span>'
+        + '<span class="match-venue">' + m.venue + '</span></div>'
+        + '<div class="match-teams"><span class="selected">' + team + '</span> vs '
+        + (flags[opp]||'') + ' ' + opp + '</div>'
+        + '<div class="match-time-row">'
+        + '<span class="match-date">' + formatSGTDate(sgt) + '</span>'
+        + '<span class="match-time">' + formatSGTTime(sgt) + '</span>'
+        + '<span class="sgt-label">SGT</span>'
+        + '</div></div>';
+    });
+    html += '</div>';
+  } else {
+    html += '<div class="no-matches">No upcoming group stage matches.</div>';
+  }
+
+  if (past.length > 0) {
+    html += '<div class="section-divider">Played &mdash; ' + past.length + ' match' + (past.length > 1 ? 'es' : '') + '</div>';
+    html += '<div class="matches-list">';
+    past.forEach(m => {
+      const sgt = toSGT(m.utc);
+      const opp = m.home === team ? m.away : m.home;
+      html += '<div class="match-card past">'
+        + '<div class="match-card-top"><span class="match-stage">Group ' + grp + '</span>'
+        + '<span class="match-venue">' + m.venue + '</span></div>'
+        + '<div class="match-teams"><span class="selected">' + team + '</span> vs '
+        + (flags[opp]||'') + ' ' + opp + '</div>'
+        + '<div class="match-time-row">'
+        + '<span class="match-date">' + formatSGTDate(sgt) + '</span>'
+        + '<span class="match-time">' + formatSGTTime(sgt) + '</span>'
+        + '<span class="sgt-label">SGT</span>'
+        + '<span class="past-tag">Played</span>'
+        + '</div></div>';
+    });
+    html += '</div>';
+  }
+
+  out.innerHTML = html;
+}
+
+// ─── INIT ───
+const now = new Date();
+const mo = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+document.getElementById('todayDate').textContent = now.getDate() + " " + mo[now.getMonth()] + " " + now.getFullYear();
+
+renderNext10();
+populateDropdown();
+</script>
+</body>
+</html>
