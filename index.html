@@ -395,20 +395,22 @@
   .brk-scroll {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    margin: 0 -14px;
-    padding: 0 14px 16px;
+    padding-bottom: 16px;
     cursor: grab;
   }
   .brk-scroll:active { cursor: grabbing; }
   .brk-track {
     display: flex;
     align-items: stretch;
-    min-width: 706px;
+    width: 100%;
   }
   .brk-col {
     display: flex;
     flex-direction: column;
-    flex-shrink: 0;
+    flex-shrink: 1;
+    min-width: 0;
+    overflow-x: hidden;
+    overflow-y: visible;
   }
   .brk-col-lbl {
     font-size: 9px;
@@ -426,12 +428,14 @@
   .brk-matches {
     display: flex;
     flex-direction: column;
-    height: 752px; /* 16 × 47px */
+    height: 1040px; /* 16 × 65px slots */
   }
   .brk-slot {
     display: flex;
     align-items: center;
     padding: 2px 3px;
+    min-height: 0;
+    overflow: visible;
   }
   .brk-card {
     background: #fafafa;
@@ -482,13 +486,13 @@
 
   /* Connector column */
   .brk-con {
-    width: 12px;
-    flex-shrink: 0;
+    width: 10px;
+    flex: 0 0 10px;
     display: flex;
     flex-direction: column;
   }
   .brk-con-spc { height: 24px; flex-shrink: 0; } /* aligns with label row */
-  .brk-con-inner { display: flex; flex-direction: column; height: 752px; }
+  .brk-con-inner { display: flex; flex-direction: column; height: 1040px; }
   .brk-cpair { display: flex; flex-direction: column; }
   .brk-cpair .cst { border-right: 1.5px solid #ddd; border-bottom: 1.5px solid #ddd; }
   .brk-cpair .csb { border-right: 1.5px solid #ddd; border-top: 1.5px solid #ddd; }
@@ -810,10 +814,18 @@ function renderBracket() {
   let html = '<div class="brk-scroll"><div class="brk-track">';
 
   // ── R32 column ──
-  html += '<div class="brk-col" style="width:118px">';
+  html += '<div class="brk-col" style="flex:11;min-width:0">';
   html += '<div class="brk-col-lbl">R32</div><div class="brk-matches">';
   bkt_r32.forEach(m => {
-    html += '<div class="brk-slot" style="flex:1">'+ r32Card(m) +'</div>';
+    const past = isPast(m.utc);
+    const {d,t} = sgt2(m.utc);
+    html += '<div class="brk-slot" style="flex:1">'
+      + '<div class="brk-card'+(past?' past':'')+'">'
+      + '<div class="brk-mn">'+m.m+'</div>'
+      + '<div class="brk-t1">'+m.home+'</div>'
+      + '<div class="brk-t2">'+m.away+'</div>'
+      + '<div class="brk-tm">'+t+'<span class="brk-sgt">SGT</span></div>'
+      + '</div></div>';
   });
   html += '</div></div>';
 
@@ -831,7 +843,7 @@ function renderBracket() {
     {id:'M95', t1:'W: Argentina/C.Verde',   t2:'W: Australia/Egypt',  utc:'2026-07-07T16:00:00Z'},
     {id:'M96', t1:'W: Swiss/Algeria',       t2:'W: Colombia/Ghana',   utc:'2026-07-07T20:00:00Z'},
   ];
-  html += '<div class="brk-col" style="width:112px">';
+  html += '<div class="brk-col" style="flex:10;min-width:0">';
   html += '<div class="brk-col-lbl">R16</div><div class="brk-matches">';
   r16.forEach(m => {
     html += '<div class="brk-slot" style="flex:2">'+tbdCard(m.id,m.t1,m.t2,m.utc,'')+'</div>';
@@ -848,7 +860,7 @@ function renderBracket() {
     {id:'M99',  t1:'W M92', t2:'W M89', utc:'2026-07-11T21:00:00Z'},
     {id:'M100', t1:'W M95', t2:'W M96', utc:'2026-07-12T01:00:00Z'},
   ];
-  html += '<div class="brk-col" style="width:104px">';
+  html += '<div class="brk-col" style="flex:9;min-width:0">';
   html += '<div class="brk-col-lbl">QF</div><div class="brk-matches">';
   qf.forEach(m => {
     html += '<div class="brk-slot" style="flex:4">'+tbdCard(m.id,m.t1,m.t2,m.utc,'')+'</div>';
@@ -863,7 +875,7 @@ function renderBracket() {
     {id:'M101', t1:'W M97', t2:'W M98',  utc:'2026-07-14T19:00:00Z'},
     {id:'M102', t1:'W M99', t2:'W M100', utc:'2026-07-15T19:00:00Z'},
   ];
-  html += '<div class="brk-col" style="width:104px">';
+  html += '<div class="brk-col" style="flex:9;min-width:0">';
   html += '<div class="brk-col-lbl">Semi</div><div class="brk-matches">';
   sf.forEach(m => {
     html += '<div class="brk-slot" style="flex:8">'+tbdCard(m.id,m.t1,m.t2,m.utc,'bsf')+'</div>';
@@ -874,7 +886,7 @@ function renderBracket() {
   html += conCol(1, 8);
 
   // ── Final column ──
-  html += '<div class="brk-col" style="width:104px">';
+  html += '<div class="brk-col" style="flex:9;min-width:0">';
   html += '<div class="brk-col-lbl">Final</div><div class="brk-matches">';
   html += '<div class="brk-slot" style="flex:16">'
     + tbdCard('M104','W M101','W M102','2026-07-19T19:00:00Z','bfin')
